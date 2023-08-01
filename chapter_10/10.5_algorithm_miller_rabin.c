@@ -1,6 +1,3 @@
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
 static uint64_t power(uint64_t x, uint64_t y, uint64_t p)
 {
     uint64_t result = 1LLU;

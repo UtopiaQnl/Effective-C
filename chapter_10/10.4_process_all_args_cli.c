@@ -18,7 +18,7 @@ static uint64_t *convert_command_line_args(int argc, const char *argv[], size_t 
         // Пытаемся преобразовать аргументы в целое число. Если его не удается преобразовать,
         // присваиваем failed_conversion значение true
         uint64_t one_arg;
-        failed_conversion |= !convert_args(argc[i], &one_arg);
+        failed_conversion |= !convert_arg(argv[i], &one_arg);
         args[i - 1] = one_arg;
     }
 
