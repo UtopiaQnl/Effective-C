@@ -1,6 +1,7 @@
 TARGET_NAME	:= primetest
 
 LIBS 		:= PrimalityUtilities
+EXTERN_LIBS :=
 
 LDIR_NAME 	:= lib
 LBUID_DIR 	:= .build
@@ -28,7 +29,7 @@ CFLAGS 		:= -std=c17 -Wall -Wextra -Werror -Wshadow -Wvla -Walloca -Wundef -Wflo
 
 CPPFLAGS 	:= $(addprefix -I,$(INCLDS)) -MMD -MP
 LDFLAGS 	:= $(addprefix -L,$(dir $(LIBS_TARGET)))
-LDLIBS 		:= $(addprefix -l,$(LIBS))
+LDLIBS 		:= $(addprefix -l,$(LIBS)) $(addprefix -l,$(EXTERN_LIBS))
 
 RM          := rm -f
 MAKEFLAGS 	+= --silent --no-print-directory
@@ -44,7 +45,9 @@ $(TARGET): $(OBJECTS) $(LIBS_TARGET)
 	$(info [LINKING] $@ : $(CC) $(OBJECTS) $(LDFLAGS) $(LDLIBS) -o $@)
 
 $(LIBS_TARGET):
-	$(foreach d, $(LIBS_DIRS:%$(LBUID_DIR)/=%), $(MAKE) -C $d)
+	for d in $(LIBS_DIRS:%$(LBUID_DIR)/=%); do\
+		$(MAKE) -C $$d; \
+	done
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(DIR_DUP)

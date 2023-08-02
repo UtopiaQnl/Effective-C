@@ -8,16 +8,15 @@ OBJ_DIR 	:= $(BUILD_DIR)/objects
 
 TARGET 		:= $(BUILD_DIR)/$(TARGET_NAME)
 
-ALL_SRCS  	:= $(shell find $(SRC_DIR) -type f -name '*.c' 2>/dev/null)
-SOURCES		:= $(ALL_SRCS:$(SRC_DIR)/%=%)
-OBJECTS     := $(SOURCES:%.c=$(OBJ_DIR)/%.o)
+OBJECTS     := $(patsubst %.c, $(OBJ_DIR)/%.o, $(patsubst $(SRC_DIR)/%, %, $(shell find $(SRC_DIR) -type f -name '*.c' 2>/dev/null)))
 DEPS 		:= $(OBJECTS:.o=.d)
 
 CC 			:= clang
 CFLAGS 		:= -std=c17 -Wall -Wextra -Werror -Wshadow -Wvla -Walloca -Wundef -Wfloat-equal \
 				-Wstrict-prototypes -Wconversion -Wswitch-enum -Wswitch-default -Wimplicit-fallthrough \
 				-Wunreachable-code -Wformat=2 -Wparentheses -Wmisleading-indentation -Wpedantic -pedantic -O2
-CPPFLAGS 	:= -I $(INCLD_DIR) -MMD -MP
+
+CPPFLAGS 	:= -I$(INCLD_DIR) -MMD -MP
 LDFLAGS 	:=
 AR 			:= ar
 ARFLAGS 	:= -r -c -s
@@ -42,24 +41,28 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 -include $(DEPS)
 
 .PHONY: build
-build: $(TARGET)
+build: $(TARGET)  ## Build library
 	$(shell ranlib $(TARGET))
 	$(info [RANLIB] $(TARGET))
 
 .PHONY: re
-re:
+re:  ## Rebuild library
 	$(MAKE) fclean
 	$(MAKE) all
 
 .PHONY: clean
-clean:
+clean:  ## Remove all object and dep files
 	$(info $(RM) $(OBJECTS) $(DEPS))
 	$(RM) $(OBJECTS) $(DEPS)
 
 .PHONY: fclean
-fclean: clean
+fclean: clean  ## Remove library + all object files + dep files
 	$(info $(RM) $(TARGET))
 	$(RM) $(TARGET)
+
+.PHONY: help
+help:  ## Show this output, i.e. help to use the commands
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 info-%:
 	@make --dry-run --always-make $* | grep -v "info"
