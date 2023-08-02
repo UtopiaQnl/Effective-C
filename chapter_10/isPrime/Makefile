@@ -1,24 +1,24 @@
 TARGET_NAME	:= primetest
 
 LIBS 		:= PrimalityUtilities
+
+LDIR_NAME 	:= lib
 LBUID_DIR 	:= .build
-LIBS_TARGET := lib/PrimalityUtilities/$(LBUID_DIR)/libPrimalityUtilities.a
+LIBS_TARGET := $(foreach l, $(LIBS), $(LDIR_NAME)/$(l)/$(LBUID_DIR)/lib$(l).a)
 LIBS_DIRS 	:= $(dir $(LIBS_TARGET))
 
-INCLD_NAME 	:= include
+IDIR_NAME 	:= include
 
 SRC_DIR     := src
-INCLDS 		:= $(shell find . -type d -name '$(INCLD_NAME)' 2>/dev/null)
-INCLD_DIRS 	:= $(INCLDS:./%=%)
 BUILD_DIR   := .build
+
+INCLDS 		:= $(patsubst ./%, %, $(shell find . -type d -name '$(IDIR_NAME)' 2>/dev/null))
 OBJ_DIR 	:= $(BUILD_DIR)/objects
 EXEC_DIR 	:= $(BUILD_DIR)/release
 
 TARGET 		:= $(EXEC_DIR)/$(TARGET_NAME)
 
-ALL_SRCS  	:= $(shell find $(SRC_DIR) -type f -name '*.c' 2>/dev/null)
-SOURCES		:= $(ALL_SRCS:$(SRC_DIR)/%=%)
-OBJECTS     := $(SOURCES:%.c=$(OBJ_DIR)/%.o)
+OBJECTS		:= $(patsubst %.c, $(OBJ_DIR)/%.o,$(patsubst $(SRC_DIR)/%, %, $(shell find $(SRC_DIR) -type f -name '*.c' 2>/dev/null)))
 DEPS 		:= $(OBJECTS:.o=.d)
 
 CC 			:= clang
@@ -26,7 +26,7 @@ CFLAGS 		:= -std=c17 -Wall -Wextra -Werror -Wshadow -Wvla -Walloca -Wundef -Wflo
 				-Wstrict-prototypes -Wconversion -Wswitch-enum -Wswitch-default -Wimplicit-fallthrough \
 				-Wunreachable-code -Wformat=2 -Wparentheses -Wmisleading-indentation -Wpedantic -pedantic -O2
 
-CPPFLAGS 	:= $(addprefix -I,$(INCLD_DIRS)) -MMD -MP
+CPPFLAGS 	:= $(addprefix -I,$(INCLDS)) -MMD -MP
 LDFLAGS 	:= $(addprefix -L,$(dir $(LIBS_TARGET)))
 LDLIBS 		:= $(addprefix -l,$(LIBS))
 
